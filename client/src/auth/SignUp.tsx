@@ -54,11 +54,11 @@ const SignUp = () => {
   const [date, setDate] = React.useState<Date>();
   return (
     <div className="flex ">
-      <div className=" w-1/2 bg-zinc-800 h-screen hidden md:block">
-        <div className=" flex flex-col text-white px-5 py-6 justify-between h-screen ">
-          <div className="flex gap-2">
+      <div className=" w-1/2 bg-zinc-800 h-screen hidden md:block ">
+        <div className=" flex flex-col text-white px-5 py-4 justify-between h-screen ">
+          <div className="flex gap-1">
             <GrTechnology size={30} />
-            <span className="text-xl font-bold">Solace</span>
+            <span className="text-lg font-bold">Solace</span>
           </div>
           <div className="text-white  w-1/2">
             " Lorem ipsum dolor one harum temporibus repellat illum
@@ -66,8 +66,8 @@ const SignUp = () => {
           </div>
         </div>
       </div>
-      <div className="w-full md:w-1/2 ">
-        <div className="flex w-full h-screen ">
+      <div className="w-full md:w-1/2 overflow-y-scroll ">
+        <div className="flex w-full  ">
           <Card
             {...form}
             className=" border-none w-full h-screen px-5 py-5 flex flex-col"
@@ -230,9 +230,9 @@ const SignUp = () => {
                   </div>
                 </div>
 
-                <div className="flex w-full flex-col gap-2">
+                <div className="flex w-full flex-col gap-1">
                   <Button className="w-full">Sign Up</Button>
-                  <div className="relative flex py-5 items-center">
+                  <div className="relative flex py-3 items-center">
                     <div className="flex-grow border-t border-gray-300"></div>
                     <span className="flex-shrink px-3 text-gray-400 text-sm">
                       or

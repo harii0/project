@@ -1,10 +1,14 @@
+import React from "react";
 import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { ModeToggle } from "@/components/mode-toggle";
 import { FaGoogle } from "react-icons/fa";
 import { Link } from "react-router-dom";
+import  SvgComponent  from "@/assets/images/svgComponent";
+import "./Login.css";
 // import { FaGithub } from "react-icons/fa";
 import {
   Form,
@@ -15,13 +19,15 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import loginSchema from "@/helper/loginSchema";
+import { Eye, EyeOff } from "lucide-react";
 // import "./Login.css";
 const Login = () => {
   const formValues = (values: z.infer<typeof loginSchema>) => {
     event?.preventDefault();
     console.log(values);
   };
-
+  //show-hide password
+  const [show, setShow] = React.useState(false);
   const form = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
@@ -31,10 +37,17 @@ const Login = () => {
   });
   return (
     <div className="flex w-full h-screen">
-      <div className=" w-full md:w-1/3 bg-white shadow-md flex h-screen flex-col gap-8 px-5">
-        <div className="px-5 py-10 flex flex-col gap-2">
-          <span className=" text-2xl font-bold">Login</span>
-          <p className="text-sm text-gray-500">Welcome back </p>
+      <div className=" w-full md:w-1/2 shadow-md flex h-screen flex-col gap-8 px-5">
+        <div className="px-5 py-10 flex gap-2 justify-between">
+          <div className="flex gap-4 flex-col">
+            <h1 className="text-2xl font-bold">Login</h1>
+            <p className="text-sm text-gray-500">
+              please login to your account
+            </p>
+          </div>
+          <div>
+            <ModeToggle />
+          </div>
         </div>
         <div className="form">
           <Form {...form}>
@@ -65,21 +78,36 @@ const Login = () => {
                 control={form.control}
                 name="password"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem className=" relative">
                     <FormLabel className="text-black">password</FormLabel>
-                    <FormControl>
+                    <FormControl className="relative">
                       <Input
-                        type="password"
-                        placeholder="enter password"
+                        type={show ? "text" : "password"}
+                        placeholder="P@ssw0rd1"
                         {...field}
                       />
                     </FormControl>
+                    <div className="absolute top-0 right-2 cursor-pointer">
+                      {show ? (
+                        <Eye
+                          size={15}
+                          className=" text-gray-500"
+                          onClick={() => setShow(!show)}
+                        />
+                      ) : (
+                        <EyeOff
+                          size={15}
+                          className=" text-gray-500"
+                          onClick={() => setShow(!show)}
+                        />
+                      )}
+                    </div>
                     <FormMessage className="text-xs" />
                   </FormItem>
                 )}
               />
-              <Button type="submit" className="w-full">
-                submit
+              <Button type="submit" className="w-full py-1 ">
+                Login
               </Button>
               <div className="relative flex py-5 items-center">
                 <div className="flex-grow border-t border-gray-300"></div>
@@ -91,7 +119,7 @@ const Login = () => {
               <div className="w-full px-1">
                 <Button
                   variant={"outline"}
-                  className="w-full text-sm text-gray-500"
+                  className="w-full text-sm text-gray-500 "
                 >
                   <FaGoogle className="mr-1" /> Login with Google
                 </Button>
@@ -109,7 +137,11 @@ const Login = () => {
           </Form>
         </div>
       </div>
-      <div className=" bg-black hidden md:block"></div>
+      <div className=" hidden md:flex w-full justify-center items-center">
+        <div className=" w-[500px]">
+          <SvgComponent />  
+        </div>
+      </div>
     </div>
   );
 };
