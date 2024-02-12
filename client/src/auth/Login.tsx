@@ -1,5 +1,6 @@
 import React from "react";
 import * as z from "zod";
+import axios from "axios";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
@@ -7,8 +8,7 @@ import { Input } from "@/components/ui/input";
 import { ModeToggle } from "@/components/mode-toggle";
 import { FaGoogle } from "react-icons/fa";
 import { Link } from "react-router-dom";
-import  SvgComponent  from "@/assets/images/svgComponent";
-import "./Login.css";
+import SvgComponent from "@/assets/images/svgComponent";
 // import { FaGithub } from "react-icons/fa";
 import {
   Form,
@@ -20,13 +20,11 @@ import {
 } from "@/components/ui/form";
 import loginSchema from "@/helper/loginSchema";
 import { Eye, EyeOff } from "lucide-react";
-// import "./Login.css";
+import { toast } from "@/components/ui/use-toast";
+import { useNavigate } from "react-router-dom";
 const Login = () => {
-  const formValues = (values: z.infer<typeof loginSchema>) => {
-    event?.preventDefault();
-    console.log(values);
-  };
   //show-hide password
+  const navigate = useNavigate();
   const [show, setShow] = React.useState(false);
   const form = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
@@ -35,15 +33,40 @@ const Login = () => {
       password: "",
     },
   });
+  const formValues = async (data: z.infer<typeof loginSchema>) => {
+    try {
+      console.log(data);
+      const res = await axios.post("http://localhost:3000/login", data, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      console.log(res);
+      if (res.status === 200) {
+        toast({
+          variant: "success",
+          description: "Login successful",
+        });
+        localStorage.setItem("token", res.data.token);
+        navigate("/dashboard");
+      }
+    } catch (err) {
+      toast({
+        variant: "destructive",
+        description: "Invalid credentials",
+      });
+    }
+  };
   return (
     <div className="flex w-full h-screen">
       <div className=" w-full md:w-1/2 shadow-md flex h-screen flex-col gap-8 px-5">
         <div className="px-5 py-10 flex gap-2 justify-between">
           <div className="flex gap-4 flex-col">
             <h1 className="text-2xl font-bold">Login</h1>
-            <p className="text-sm text-gray-500">
-              please login to your account
-            </p>
+            <span className="text-xs font-normal text-gray-500">
+              Login to your account
+            </span>
           </div>
           <div>
             <ModeToggle />
@@ -62,7 +85,7 @@ const Login = () => {
                 name="email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-black">Email</FormLabel>
+                    <FormLabel>Email</FormLabel>
                     <FormControl>
                       <Input
                         type="text"
@@ -79,7 +102,7 @@ const Login = () => {
                 name="password"
                 render={({ field }) => (
                   <FormItem className=" relative">
-                    <FormLabel className="text-black">password</FormLabel>
+                    <FormLabel>password</FormLabel>
                     <FormControl className="relative">
                       <Input
                         type={show ? "text" : "password"}
@@ -106,9 +129,15 @@ const Login = () => {
                   </FormItem>
                 )}
               />
+              <div className="flex w-full py-1 justify-end">
+                <p className="text-xs">
+                  <Link to={"/forgetpassword"}>Forget Password</Link>?
+                </p>
+              </div>
               <Button type="submit" className="w-full py-1 ">
                 Login
               </Button>
+
               <div className="relative flex py-5 items-center">
                 <div className="flex-grow border-t border-gray-300"></div>
                 <span className="flex-shrink px-3 text-gray-400 text-sm">
@@ -117,11 +146,8 @@ const Login = () => {
                 <div className="flex-grow border-t border-gray-300"></div>
               </div>
               <div className="w-full px-1">
-                <Button
-                  variant={"outline"}
-                  className="w-full text-sm text-gray-500 "
-                >
-                  <FaGoogle className="mr-1" /> Login with Google
+                <Button variant={"outline"} className="w-full text-xs  ">
+                  <FaGoogle className="mr-3" /> Login with Google
                 </Button>
               </div>
             </form>
@@ -139,7 +165,7 @@ const Login = () => {
       </div>
       <div className=" hidden md:flex w-full justify-center items-center">
         <div className=" w-[500px]">
-          <SvgComponent />  
+          <SvgComponent />
         </div>
       </div>
     </div>

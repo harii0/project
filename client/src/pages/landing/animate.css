@@ -1,0 +1,15 @@
+.sliding-text {
+  overflow: hidden;
+  display: inline-block;
+}
+
+.sliding-text li {
+  transform: translateY(100%);
+  opacity: 0;
+  transition: transform 0.5s ease-out, opacity 0.5s ease-out;
+}
+
+.sliding-text li.visible {
+  transform: translateY(0);
+  opacity: 1;
+}

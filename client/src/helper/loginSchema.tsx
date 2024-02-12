@@ -1,15 +1,11 @@
 import * as z from "zod";
 
 const loginSchema = z.object({
-  username: z
-    .string()
-    .min(3, { message: "Username must be at least 3 characters" }),
   email: z.string().email(),
-  confirm: z.string(),
   password: z
     .string()
-    .min(8, { message: "Password must be at least 8 characters long." })
-    .max(10, { message: "Password must be at most 10 characters long." })
+    .min(8, { message: "Password must be at least 6 characters long." })
+    .max(16, { message: "Password must be at most 12 characters long." })
     .refine(
       (password) => {
         const containsUppercase = /[A-Z]/.test(password);
@@ -26,10 +22,8 @@ const loginSchema = z.object({
         );
       },
       {
-        message:
-          "Password must contain at least one uppercase, one lowercase, one special character, and one number.",
+        message: "Invalid password format.",
       }
     ),
 });
-
 export default loginSchema;

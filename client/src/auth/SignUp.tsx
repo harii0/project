@@ -3,6 +3,8 @@ import * as z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { Link } from "react-router-dom";
+import { ModeToggle } from "@/components/mode-toggle";
+import axios from "axios";
 import {
   Form,
   FormControl,
@@ -11,51 +13,80 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { format } from "date-fns";
-import { Calendar as CalendarIcon } from "lucide-react";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 
-import { cn } from "@/lib/utils";
-import { Calendar } from "@/components/ui/calendar";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import {
-  Card,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { GrTechnology } from "react-icons/gr";
 import { Eye } from "lucide-react";
 import { EyeOff } from "lucide-react";
-import loginSchema from "@/helper/loginSchema";
+import signUpSchema from "@/helper/signUpSchema";
 import { FaGoogle } from "react-icons/fa";
+import { toast } from "@/components/ui/use-toast";
 const SignUp = () => {
+  const navigate = useNavigate();
   const [show, setShow] = React.useState(false);
   const [show1, setShow1] = React.useState(false);
-  const form = useForm<z.infer<typeof loginSchema>>({
-    resolver: zodResolver(loginSchema),
+  const form = useForm<z.infer<typeof signUpSchema>>({
+    resolver: zodResolver(signUpSchema),
     defaultValues: {
       username: "",
       email: "",
       password: "",
       confirm: "",
+      dob: undefined,
     },
   });
-  const formValues = (values: z.infer<typeof loginSchema>) => {
-    event?.preventDefault();
-    console.log(values);
+
+  const formValues = async (data: z.infer<typeof signUpSchema>) => {
+    try {
+      const res = await axios.post("http://localhost:3000/signup", data, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      if (res.status === 200) {
+        toast({
+          variant: "success",
+          description: "Account created successfully",
+        });
+        setTimeout(() => navigate("/login"), 3000);
+      } else {
+        toast({
+          variant: "destructive",
+          description: "Account already exists",
+        });
+      }
+    } catch (err) {
+      if (axios.isAxiosError(err)) {
+        const status = err.response?.status;
+        if (status === 409) {
+          // Assuming 409 is used for "Account already exists"
+          toast({
+            variant: "destructive",
+            description: "Email already exists",
+          });
+        } else {
+          toast({
+            variant: "destructive",
+            description: "An error occurred. Please try again.",
+          });
+        }
+      } else {
+        // Handle non-Axios errors
+        toast({
+          variant: "destructive",
+          description: "An unexpected error occurred",
+        });
+      }
+    }
   };
-  const [date, setDate] = React.useState<Date>();
   return (
     <div className="flex ">
       <div className=" w-1/2 bg-zinc-800 h-screen hidden md:block ">
-        <div className=" flex flex-col text-white px-5 py-4 justify-between h-screen ">
+        <div className=" flex flex-col text-white px-5 py-5 justify-between h-screen ">
           <div className="flex gap-1">
             <GrTechnology size={30} />
             <span className="text-lg font-bold">Solace</span>
@@ -67,34 +98,34 @@ const SignUp = () => {
         </div>
       </div>
       <div className="w-full md:w-1/2 overflow-y-scroll ">
-        <div className="flex w-full  ">
-          <Card
-            {...form}
-            className=" border-none w-full h-screen px-5 py-5 flex flex-col"
-          >
-            <CardHeader className="flex gap-2">
-              <CardTitle className="text-2xl font-bold ">
+        <div className="flex w-full">
+          <div className=" border-none w-full h-screen px-5  flex flex-col justify-center gap-6">
+            <div className="flex gap-1 flex-col px-4 ">
+              <div className="text-2xl font-bold flex justify-between items-center">
                 Create account
-              </CardTitle>
-              <CardDescription className=" text-gray-500">
-                Enter your email & password below to SignUp
-              </CardDescription>
-            </CardHeader>
+                <div>
+                  <ModeToggle />
+                </div>
+              </div>
+              <div className=" text-gray-500 text-xs">
+                Enter your details to create your account
+              </div>
+            </div>
             <Form {...form}>
               <form
                 action=""
                 method="post"
-                className="px-5 flex flex-col gap-4"
+                className="px-5 flex flex-col gap-5 w-full"
                 onSubmit={form.handleSubmit(formValues)}
               >
-                <div className="flex w-full gap-3">
+                <div className="flex w-full gap-3 items-end">
                   <div className=" w-full">
                     <FormField
                       control={form.control}
                       name="username"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel className="text-black">Username</FormLabel>
+                          <FormLabel>Username</FormLabel>
                           <FormControl>
                             <Input
                               type="text"
@@ -107,34 +138,29 @@ const SignUp = () => {
                       )}
                     />
                   </div>
-                  <div className="grid w-full  items-center  gap-3">
-                    <Label htmlFor="password">Date of Birth</Label>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <Button
-                          variant={"outline"}
-                          className={cn(
-                            "w-full justify-start text-left font-normal",
-                            !date && "text-muted-foreground"
-                          )}
-                        >
-                          <CalendarIcon className="mr-2 h-4 w-4" />
-                          {date ? (
-                            format(date, "PPP")
-                          ) : (
-                            <span>Pick a date</span>
-                          )}
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0">
-                        <Calendar
-                          mode="single"
-                          selected={date}
-                          onSelect={setDate}
-                          initialFocus
-                        />
-                      </PopoverContent>
-                    </Popover>
+                  <div className="flex w-full  items-center  gap-3">
+                    <FormField
+                      control={form.control}
+                      name="dob"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-col">
+                          <FormLabel>Date of birth</FormLabel>
+                          <DatePicker
+                            selected={
+                              field.value ? new Date(field.value) : null
+                            }
+                            onChange={(date: Date) => field.onChange(date)}
+                            dateFormat="MMMM d, yyyy"
+                            maxDate={new Date()}
+                            showYearDropdown
+                            dropdownMode="select"
+                            className="input px-4 py-1 text-sm " 
+                            placeholderText="Select date"
+                          />
+                          <FormMessage className="text-xs" />
+                        </FormItem>
+                      )}
+                    />
                   </div>
                 </div>
                 <div className="grid w-full items-center gap-3">
@@ -143,7 +169,7 @@ const SignUp = () => {
                     name="email"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-black">Email</FormLabel>
+                        <FormLabel>Email</FormLabel>
                         <FormControl>
                           <Input
                             type="text"
@@ -164,7 +190,7 @@ const SignUp = () => {
                       name="password"
                       render={({ field }) => (
                         <FormItem className="relative">
-                          <FormLabel className="text-black">Password</FormLabel>
+                          <FormLabel>Password</FormLabel>
                           <FormControl>
                             <Input
                               type={show ? "text" : "password"}
@@ -172,7 +198,7 @@ const SignUp = () => {
                               {...field}
                             />
                           </FormControl>
-                          <div className="absolute top-0 right-2">
+                          <div className="absolute top-0 right-2 cursor-pointer">
                             {show ? (
                               <Eye
                                 size={15}
@@ -198,17 +224,15 @@ const SignUp = () => {
                       name="confirm"
                       render={({ field }) => (
                         <FormItem className="relative">
-                          <FormLabel className="text-black">
-                            Confirm Password
-                          </FormLabel>
+                          <FormLabel>Confirm Password</FormLabel>
                           <FormControl>
                             <Input
                               type={show1 ? "text" : "password"}
-                              placeholder="create password"
+                              placeholder="confirm your password"
                               {...field}
                             />
                           </FormControl>
-                          <div className="absolute top-0 right-2">
+                          <div className="absolute top-0 right-2 cursor-pointer">
                             {show1 ? (
                               <Eye
                                 size={15}
@@ -248,7 +272,7 @@ const SignUp = () => {
                 </div>
               </form>
             </Form>
-            <div className="w-full flex justify-center items-center mt-5 gap-1">
+            <div className="w-full flex justify-center items-center mb-4 gap-1 ">
               <p className="text-xs  items-center">Already have an account?</p>
               <Link
                 to="/login"
@@ -257,7 +281,7 @@ const SignUp = () => {
                 Login
               </Link>
             </div>
-          </Card>
+          </div>
         </div>
       </div>
     </div>
